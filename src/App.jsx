@@ -99,6 +99,7 @@ function App() {
             }
         })
 
+        setDictionaryDefinition([])
         setDictionaryWord(node.id)
         getDefinitionOfWord(node.id, (data) => {
             setDictionaryDefinition(data)
@@ -114,6 +115,7 @@ function App() {
             }
         })
 
+        setDictionaryDefinition([])
         setDictionaryWord(entry)
         getDefinitionOfWord(entry, (data) => {
             setDictionaryDefinition(data)
