@@ -5,31 +5,18 @@ import SpriteText from 'three-spritetext';
 import * as THREE from 'three';
 
 let urlPrefixes = {
-    "associations": "https://wordassociations.net/en/words-associated-with/",
+    "associations": "https://word-network-data.davitg.com/association?word=",
     "dictionary": "https://api.dictionaryapi.dev/api/v2/entries/en/"
 }
 
-let types = {
-    nouns: "NOUN-SECTION",
-    adjectives: "ADJECTIVE-SECTION",
-    verbs: "VERB-SECTION",
-    adverbs: "ADVERB-SECTION",
-}
-
-var stringToHTML = function (str) {
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(str, 'text/html');
-    return doc.body;
-};
-
-const getAssociationsOfWord = (word, type, callback) => {
+const getAssociationsOfWord = (word, type = "nouns", callback) => {
     fetch(urlPrefixes["associations"] + word).then(response => response.text()).then(data => {
-        let domElements = stringToHTML(data).getElementsByClassName(type)[0]
-        console.log(domElements)
-        let list = domElements.getElementsByTagName("li")
+        data = JSON.parse(data)
+
+        let list = data[type]
         let associations = []
         for (let i = 0; i < Math.min(list.length, 20); i++) {
-            associations.push(list[i].textContent.toLowerCase())
+            associations.push(list[i])
         }
         callback(associations)
     })
@@ -105,7 +92,7 @@ function App() {
     }, [])
 
     const pressedNode = (node) => {
-        getAssociationsOfWord(node.id, types.nouns, (data) => {
+        getAssociationsOfWord(node.id, "nouns", (data) => {
             let groupColor = Math.floor(Math.random() * 10000)
             for (let i = 0; i < data.length; i++) {
                 addLinkAndNodesToGraph(node.id, data[i], groupColor)
@@ -121,7 +108,7 @@ function App() {
     const clickedSearch = (entry) => {
         document.getElementById("search").value = ""
 
-        getAssociationsOfWord(entry, types.nouns, (data) => {
+        getAssociationsOfWord(entry, "nouns", (data) => {
             for (let i = 0; i < data.length; i++) {
                 addLinkAndNodesToGraph(entry, data[i], 0)
             }
@@ -136,7 +123,6 @@ function App() {
     }
 
     const rightClicked = (node) => {
-        console.log(node)
         setDictionaryWord(node.id)
         getDefinitionOfWord(node.id, (data) => {
             setDictionaryDefinition(data)
